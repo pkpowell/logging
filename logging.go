@@ -11,6 +11,9 @@ import (
 	"github.com/lmittmann/tint"
 )
 
+type Display func(string, ...any)
+type Create func(string, error) error
+
 const (
 	YYYYMMDD            = "2006-01-02"
 	HHMMSS24h           = "15:04:05"
@@ -27,7 +30,12 @@ var (
 	logLevel                    = &slog.LevelVar{} // INFO
 )
 
-func Init(verbose *bool, jsonLogs *bool) (DisplayLog, DisplayLog, DisplayLog, DisplayLog, CreateError) {
+var (
+	Errorf, Warnf, Infof, Debugf Display
+	Errorw                       Create
+)
+
+func Init(verbose *bool, jsonLogs *bool) {
 	handler = &slog.HandlerOptions{
 		Level: logLevel,
 	}
@@ -66,69 +74,56 @@ func Init(verbose *bool, jsonLogs *bool) (DisplayLog, DisplayLog, DisplayLog, Di
 
 	}
 
-	// if *verbose {
-	// } else {
-	// }
-
-	// if *jsonLogs {
-	// } else {
-	// }
-
 	slog.SetDefault(logger)
 
-	return Infof, Errorf, Warnf, Debugf, Errorw
-}
-
-type DisplayLog func(string, ...any)
-type CreateError func(string, error) error
-
-func Infof(format string, args ...any) {
-	if !logger.Enabled(context.Background(), slog.LevelInfo) {
-		return
+	Infof = func(format string, args ...any) {
+		if !logger.Enabled(context.Background(), slog.LevelInfo) {
+			return
+		}
+		var pcs [1]uintptr
+		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
+		r := slog.NewRecord(time.Now(), slog.LevelInfo, fmt.Sprintf(format, args...), pcs[0])
+		_ = logger.Handler().Handle(context.Background(), r)
 	}
-	var pcs [1]uintptr
-	runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-	r := slog.NewRecord(time.Now(), slog.LevelInfo, fmt.Sprintf(format, args...), pcs[0])
-	_ = logger.Handler().Handle(context.Background(), r)
-}
 
-func Warnf(format string, args ...any) {
-	if !logger.Enabled(context.Background(), slog.LevelWarn) {
-		return
+	Warnf = func(format string, args ...any) {
+		if !logger.Enabled(context.Background(), slog.LevelWarn) {
+			return
+		}
+		var pcs [1]uintptr
+		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
+		r := slog.NewRecord(time.Now(), slog.LevelWarn, fmt.Sprintf(format, args...), pcs[0])
+		_ = logger.Handler().Handle(context.Background(), r)
 	}
-	var pcs [1]uintptr
-	runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-	r := slog.NewRecord(time.Now(), slog.LevelWarn, fmt.Sprintf(format, args...), pcs[0])
-	_ = logger.Handler().Handle(context.Background(), r)
-}
 
-func Debugf(format string, args ...any) {
-	if !logger.Enabled(context.Background(), slog.LevelDebug) {
-		return
+	Debugf = func(format string, args ...any) {
+		if !logger.Enabled(context.Background(), slog.LevelDebug) {
+			return
+		}
+		var pcs [1]uintptr
+		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
+		// fmt.Println("pcs: ", pcs[0])
+		r := slog.NewRecord(time.Now(), slog.LevelDebug, fmt.Sprintf(format, args...), pcs[0])
+		_ = logger.Handler().Handle(context.Background(), r)
 	}
-	var pcs [1]uintptr
-	runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-	// fmt.Println("pcs: ", pcs[0])
-	r := slog.NewRecord(time.Now(), slog.LevelDebug, fmt.Sprintf(format, args...), pcs[0])
-	_ = logger.Handler().Handle(context.Background(), r)
-}
 
-func Errorf(format string, args ...any) {
-	if !errLogger.Enabled(context.Background(), slog.LevelError) {
-		return
+	Errorf = func(format string, args ...any) {
+		if !errLogger.Enabled(context.Background(), slog.LevelError) {
+			return
+		}
+		var pcs [1]uintptr
+		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
+		r := slog.NewRecord(time.Now(), slog.LevelError, fmt.Sprintf(format, args...), pcs[0])
+		_ = errLogger.Handler().Handle(context.Background(), r)
 	}
-	var pcs [1]uintptr
-	runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-	r := slog.NewRecord(time.Now(), slog.LevelError, fmt.Sprintf(format, args...), pcs[0])
-	_ = errLogger.Handler().Handle(context.Background(), r)
-}
 
-func Errorw(format string, err error) error {
-	if !errLogger.Enabled(context.Background(), slog.LevelError) {
-		return nil
+	Errorw = func(format string, err error) error {
+		if !errLogger.Enabled(context.Background(), slog.LevelError) {
+			return nil
+		}
+		var pcs [1]uintptr
+		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
+		r := slog.NewRecord(time.Now(), slog.LevelError, fmt.Errorf(format+" %w", err.Error()).Error(), pcs[0])
+		return errLogger.Handler().Handle(context.Background(), r)
 	}
-	var pcs [1]uintptr
-	runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-	r := slog.NewRecord(time.Now(), slog.LevelError, fmt.Errorf(format+" %w", err.Error()).Error(), pcs[0])
-	return errLogger.Handler().Handle(context.Background(), r)
 }

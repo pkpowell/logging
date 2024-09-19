@@ -72,30 +72,6 @@ func Init(verbose *bool, jsonLogs *bool) {
 		errLogger = slog.New(tint.NewHandler(os.Stderr, errTintHandler))
 	}
 
-	// switch true {
-	// case *verbose:
-	// 	fmt.Println("Verbose logging")
-	// 	logLevel.Set(slog.LevelDebug)
-	// 	handler.AddSource = true
-	// 	tintHandler.AddSource = true
-
-	// case *jsonLogs:
-	// 	fmt.Println("JSON logging")
-	// 	logger = slog.New(slog.NewJSONHandler(os.Stderr, handler))
-	// 	errLogger = slog.New(slog.NewJSONHandler(os.Stderr, errHandler))
-
-	// 	// fallthrough
-
-	// default:
-	// 	fmt.Println("Regular logging")
-	// 	tintHandler.TimeFormat = HHMMSS24h
-	// 	errTintHandler.TimeFormat = HHMMSS24h
-
-	// 	logger = slog.New(tint.NewHandler(os.Stderr, tintHandler))
-	// 	errLogger = slog.New(tint.NewHandler(os.Stderr, errTintHandler))
-
-	// }
-
 	slog.SetDefault(logger)
 
 	Infof = func(format string, args ...any) {

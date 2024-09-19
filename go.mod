@@ -1,4 +1,4 @@
-module logging
+module github.com/pkpowell/logging
 
 go 1.23.1
 

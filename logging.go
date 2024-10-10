@@ -140,6 +140,7 @@ func Init(verbose *bool, jsonLogs *bool) {
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
 		r := slog.NewRecord(time.Now(), slog.LevelError, fmt.Errorf(text+" %w", err).Error(), pcs[0])
-		return errLogger.Handler().Handle(ctx, r)
+		return fmt.Errorf(r.Message)
+		// return errLogger.Handler().Handle(context.Background(), r)
 	}
 }

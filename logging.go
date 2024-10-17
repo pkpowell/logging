@@ -36,7 +36,7 @@ const (
 )
 
 var (
-	logger, errLogger           *slog.Logger
+	Logger, errLogger           *slog.Logger
 	handler, errHandler         *slog.HandlerOptions
 	tintHandler, errTintHandler *tint.Options
 	logLevel                    = &slog.LevelVar{} // INFO
@@ -81,43 +81,43 @@ func Init(verbose *bool, jsonLogs *bool) {
 	}
 
 	if *jsonLogs {
-		logger = slog.New(slog.NewJSONHandler(os.Stderr, handler))
+		Logger = slog.New(slog.NewJSONHandler(os.Stderr, handler))
 		errLogger = slog.New(slog.NewJSONHandler(os.Stderr, errHandler))
 	} else {
-		logger = slog.New(tint.NewHandler(os.Stderr, tintHandler))
+		Logger = slog.New(tint.NewHandler(os.Stderr, tintHandler))
 		errLogger = slog.New(tint.NewHandler(os.Stderr, errTintHandler))
 	}
 
-	slog.SetDefault(logger)
+	slog.SetDefault(Logger)
 
 	Infof = func(format string, args ...any) {
-		if !logger.Enabled(ctx, slog.LevelInfo) {
+		if !Logger.Enabled(ctx, slog.LevelInfo) {
 			return
 		}
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
 		r := slog.NewRecord(time.Now(), slog.LevelInfo, fmt.Sprintf(format, args...), pcs[0])
-		_ = logger.Handler().Handle(ctx, r)
+		_ = Logger.Handler().Handle(ctx, r)
 	}
 
 	Warnf = func(format string, args ...any) {
-		if !logger.Enabled(ctx, slog.LevelWarn) {
+		if !Logger.Enabled(ctx, slog.LevelWarn) {
 			return
 		}
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
 		r := slog.NewRecord(time.Now(), slog.LevelWarn, fmt.Sprintf(format, args...), pcs[0])
-		_ = logger.Handler().Handle(ctx, r)
+		_ = Logger.Handler().Handle(ctx, r)
 	}
 
 	Debugf = func(format string, args ...any) {
-		if !logger.Enabled(ctx, slog.LevelDebug) {
+		if !Logger.Enabled(ctx, slog.LevelDebug) {
 			return
 		}
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
 		r := slog.NewRecord(time.Now(), slog.LevelDebug, fmt.Sprintf(format, args...), pcs[0])
-		_ = logger.Handler().Handle(ctx, r)
+		_ = Logger.Handler().Handle(ctx, r)
 	}
 
 	Errorf = func(format string, args ...any) {

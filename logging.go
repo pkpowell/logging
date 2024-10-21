@@ -90,6 +90,8 @@ func Init(verbose *bool, jsonLogs *bool) {
 
 	slog.SetDefault(Logger)
 
+	// L:=slog.NewLogLogger(Logger.Handler(), slog.LevelDebug)
+
 	Infof = func(format string, args ...any) {
 		if !Logger.Enabled(ctx, slog.LevelInfo) {
 			return

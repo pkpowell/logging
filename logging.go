@@ -45,8 +45,8 @@ var (
 )
 
 var (
-	Errorf, Warnf, Infof, Debugf Display
-	Errorw                       Create
+	Errorf, Warnf, Infof, Debugf, Fmtf Display
+	Errorw                             Create
 )
 
 func Init(verbose *bool, jsonLogs *bool) {
@@ -90,7 +90,12 @@ func Init(verbose *bool, jsonLogs *bool) {
 
 	slog.SetDefault(Logger)
 
-	// L:=slog.NewLogLogger(Logger.Handler(), slog.LevelDebug)
+	Fmtf = func(format string, args ...any) {
+		if !Logger.Enabled(ctx, slog.LevelInfo) {
+			return
+		}
+		slog.Info(format, args...)
+	}
 
 	Infof = func(format string, args ...any) {
 		if !Logger.Enabled(ctx, slog.LevelInfo) {

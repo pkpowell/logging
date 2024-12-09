@@ -41,7 +41,8 @@ var (
 	tintHandler, errTintHandler *tint.Options
 	logLevel                    = &slog.LevelVar{} // INFO
 
-	ctx context.Context
+	ctx    context.Context
+	record slog.Record
 )
 
 var (
@@ -90,21 +91,14 @@ func Init(verbose *bool, jsonLogs *bool) {
 
 	slog.SetDefault(Logger)
 
-	Fmtf = func(format string, args ...any) {
-		if !Logger.Enabled(ctx, slog.LevelInfo) {
-			return
-		}
-		slog.Info(format, args...)
-	}
-
 	Infof = func(format string, args ...any) {
 		if !Logger.Enabled(ctx, slog.LevelInfo) {
 			return
 		}
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		r := slog.NewRecord(time.Now(), slog.LevelInfo, fmt.Sprintf(format, args...), pcs[0])
-		_ = Logger.Handler().Handle(ctx, r)
+		record = slog.NewRecord(time.Now(), slog.LevelInfo, fmt.Sprintf(format, args...), pcs[0])
+		_ = Logger.Handler().Handle(ctx, record)
 	}
 
 	Warnf = func(format string, args ...any) {
@@ -113,8 +107,8 @@ func Init(verbose *bool, jsonLogs *bool) {
 		}
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		r := slog.NewRecord(time.Now(), slog.LevelWarn, fmt.Sprintf(format, args...), pcs[0])
-		_ = Logger.Handler().Handle(ctx, r)
+		record = slog.NewRecord(time.Now(), slog.LevelWarn, fmt.Sprintf(format, args...), pcs[0])
+		_ = Logger.Handler().Handle(ctx, record)
 	}
 
 	Debugf = func(format string, args ...any) {
@@ -123,8 +117,8 @@ func Init(verbose *bool, jsonLogs *bool) {
 		}
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		r := slog.NewRecord(time.Now(), slog.LevelDebug, fmt.Sprintf(format, args...), pcs[0])
-		_ = Logger.Handler().Handle(ctx, r)
+		record = slog.NewRecord(time.Now(), slog.LevelDebug, fmt.Sprintf(format, args...), pcs[0])
+		_ = Logger.Handler().Handle(ctx, record)
 	}
 
 	Errorf = func(format string, args ...any) {
@@ -133,8 +127,8 @@ func Init(verbose *bool, jsonLogs *bool) {
 		}
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		r := slog.NewRecord(time.Now(), slog.LevelError, fmt.Sprintf(format, args...), pcs[0])
-		_ = errLogger.Handler().Handle(ctx, r)
+		record = slog.NewRecord(time.Now(), slog.LevelError, fmt.Sprintf(format, args...), pcs[0])
+		_ = errLogger.Handler().Handle(ctx, record)
 	}
 
 	////////////////////////////////
@@ -146,8 +140,8 @@ func Init(verbose *bool, jsonLogs *bool) {
 		}
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		r := slog.NewRecord(time.Now(), slog.LevelError, fmt.Errorf(text+" %w", err).Error(), pcs[0])
-		return fmt.Errorf(r.Message)
+		record = slog.NewRecord(time.Now(), slog.LevelError, fmt.Errorf(text+" %w", err).Error(), pcs[0])
+		return fmt.Errorf(record.Message)
 		// return errLogger.Handler().Handle(context.Background(), r)
 	}
 }

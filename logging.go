@@ -105,23 +105,23 @@ func Init(verbose *bool, jsonLogs *bool) {
 	}
 
 	Error = func(args ...string) {
-		if !Logger.Enabled(ctx, slog.LevelInfo) {
+		if !Logger.Enabled(ctx, slog.LevelError) {
 			return
 		}
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), pcs[0])
+		record = slog.NewRecord(time.Now(), slog.LevelError, strings.Join(args, " "), pcs[0])
 
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
 	Warn = func(args ...string) {
-		if !Logger.Enabled(ctx, slog.LevelInfo) {
+		if !Logger.Enabled(ctx, slog.LevelWarn) {
 			return
 		}
 		var pcs [1]uintptr
 		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), pcs[0])
+		record = slog.NewRecord(time.Now(), slog.LevelWarn, strings.Join(args, " "), pcs[0])
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 

@@ -6,12 +6,14 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/lmittmann/tint"
 )
 
-type Display func(string, ...any)
+type Displayf func(string, ...any)
+type Display func(...string)
 type Create func(string, error) error
 
 const (
@@ -46,8 +48,9 @@ var (
 )
 
 var (
-	Errorf, Warnf, Infof, Debugf, Fmtf Display
-	Errorw                             Create
+	Errorf, Warnf, Infof, Debugf Displayf
+	Error, Warn, Info, Debug     Display
+	Errorw                       Create
 )
 
 func Init(verbose *bool, jsonLogs *bool) {
@@ -90,6 +93,47 @@ func Init(verbose *bool, jsonLogs *bool) {
 	}
 
 	slog.SetDefault(Logger)
+
+	Info = func(args ...string) {
+		if !Logger.Enabled(ctx, slog.LevelInfo) {
+			return
+		}
+		var pcs [1]uintptr
+		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
+		record = slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), pcs[0])
+		_ = Logger.Handler().Handle(ctx, record)
+	}
+
+	Error = func(args ...string) {
+		if !Logger.Enabled(ctx, slog.LevelInfo) {
+			return
+		}
+		var pcs [1]uintptr
+		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
+		record = slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), pcs[0])
+
+		_ = Logger.Handler().Handle(ctx, record)
+	}
+
+	Warn = func(args ...string) {
+		if !Logger.Enabled(ctx, slog.LevelInfo) {
+			return
+		}
+		var pcs [1]uintptr
+		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
+		record = slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), pcs[0])
+		_ = Logger.Handler().Handle(ctx, record)
+	}
+
+	Debug = func(args ...string) {
+		if !Logger.Enabled(ctx, slog.LevelDebug) {
+			return
+		}
+		var pcs [1]uintptr
+		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
+		record = slog.NewRecord(time.Now(), slog.LevelDebug, strings.Join(args, " "), pcs[0])
+		_ = Logger.Handler().Handle(ctx, record)
+	}
 
 	Infof = func(format string, args ...any) {
 		if !Logger.Enabled(ctx, slog.LevelInfo) {

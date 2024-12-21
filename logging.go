@@ -2,14 +2,15 @@ package logging
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 
 	"github.com/lmittmann/tint"
+	"tlog.app/go/loc"
 )
 
 type Displayf func(string, ...any)
@@ -52,6 +53,9 @@ var (
 	Error, Warn, Info, Debug     Display
 	Errorw                       Create
 )
+
+var pcsbuf [3]loc.PC
+var pcs loc.PCs
 
 func Init(verbose *bool, jsonLogs *bool) {
 	ctx = context.Background()
@@ -98,9 +102,9 @@ func Init(verbose *bool, jsonLogs *bool) {
 		if !Logger.Enabled(ctx, slog.LevelInfo) {
 			return
 		}
-		var pcs [1]uintptr
-		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), pcs[0])
+
+		pcs = loc.CallersFill(1, pcsbuf[:])
+		record = slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -108,9 +112,9 @@ func Init(verbose *bool, jsonLogs *bool) {
 		if !Logger.Enabled(ctx, slog.LevelError) {
 			return
 		}
-		var pcs [1]uintptr
-		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelError, strings.Join(args, " "), pcs[0])
+
+		pcs = loc.CallersFill(1, pcsbuf[:])
+		record = slog.NewRecord(time.Now(), slog.LevelError, strings.Join(args, " "), uintptr(pcs[0]))
 
 		_ = Logger.Handler().Handle(ctx, record)
 	}
@@ -119,9 +123,9 @@ func Init(verbose *bool, jsonLogs *bool) {
 		if !Logger.Enabled(ctx, slog.LevelWarn) {
 			return
 		}
-		var pcs [1]uintptr
-		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelWarn, strings.Join(args, " "), pcs[0])
+
+		pcs = loc.CallersFill(1, pcsbuf[:])
+		record = slog.NewRecord(time.Now(), slog.LevelWarn, strings.Join(args, " "), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -129,9 +133,9 @@ func Init(verbose *bool, jsonLogs *bool) {
 		if !Logger.Enabled(ctx, slog.LevelDebug) {
 			return
 		}
-		var pcs [1]uintptr
-		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelDebug, strings.Join(args, " "), pcs[0])
+
+		pcs = loc.CallersFill(1, pcsbuf[:])
+		record = slog.NewRecord(time.Now(), slog.LevelDebug, strings.Join(args, " "), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -139,9 +143,9 @@ func Init(verbose *bool, jsonLogs *bool) {
 		if !Logger.Enabled(ctx, slog.LevelInfo) {
 			return
 		}
-		var pcs [1]uintptr
-		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelInfo, fmt.Sprintf(format, args...), pcs[0])
+
+		pcs = loc.CallersFill(1, pcsbuf[:])
+		record = slog.NewRecord(time.Now(), slog.LevelInfo, fmt.Sprintf(format, args...), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -149,9 +153,9 @@ func Init(verbose *bool, jsonLogs *bool) {
 		if !Logger.Enabled(ctx, slog.LevelWarn) {
 			return
 		}
-		var pcs [1]uintptr
-		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelWarn, fmt.Sprintf(format, args...), pcs[0])
+
+		pcs = loc.CallersFill(1, pcsbuf[:])
+		record = slog.NewRecord(time.Now(), slog.LevelWarn, fmt.Sprintf(format, args...), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -159,9 +163,9 @@ func Init(verbose *bool, jsonLogs *bool) {
 		if !Logger.Enabled(ctx, slog.LevelDebug) {
 			return
 		}
-		var pcs [1]uintptr
-		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelDebug, fmt.Sprintf(format, args...), pcs[0])
+
+		pcs = loc.CallersFill(1, pcsbuf[:])
+		record = slog.NewRecord(time.Now(), slog.LevelDebug, fmt.Sprintf(format, args...), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -169,9 +173,9 @@ func Init(verbose *bool, jsonLogs *bool) {
 		if !errLogger.Enabled(ctx, slog.LevelError) {
 			return
 		}
-		var pcs [1]uintptr
-		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelError, fmt.Sprintf(format, args...), pcs[0])
+
+		pcs = loc.CallersFill(1, pcsbuf[:])
+		record = slog.NewRecord(time.Now(), slog.LevelError, fmt.Sprintf(format, args...), uintptr(pcs[0]))
 		_ = errLogger.Handler().Handle(ctx, record)
 	}
 
@@ -182,10 +186,9 @@ func Init(verbose *bool, jsonLogs *bool) {
 		if !errLogger.Enabled(ctx, slog.LevelError) {
 			return nil
 		}
-		var pcs [1]uintptr
-		runtime.Callers(2, pcs[:]) // skip [Callers, Infof]
-		record = slog.NewRecord(time.Now(), slog.LevelError, fmt.Errorf(text+" %w", err).Error(), pcs[0])
-		return fmt.Errorf(record.Message)
-		// return errLogger.Handler().Handle(context.Background(), r)
+
+		pcs = loc.CallersFill(1, pcsbuf[:])
+		record = slog.NewRecord(time.Now(), slog.LevelError, fmt.Errorf(text+" %w", err).Error(), uintptr(pcs[0]))
+		return errors.New(record.Message)
 	}
 }

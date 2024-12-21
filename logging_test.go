@@ -20,6 +20,8 @@ func BenchmarkInfo(b *testing.B) {
 
 	for range 50 {
 		Info("Hello", "World")
+		Error("Hello", "World")
+		Warn("Hello", "World")
 	}
 }
 
@@ -28,7 +30,9 @@ func BenchmarkInfof(b *testing.B) {
 	Init(bp(false), bp(false))
 
 	for range 50 {
-		Infof("Hello %s", "World")
+		Info("Hello", "World")
+		Error("Hello", "World")
+		Warn("Hello", "World")
 	}
 }
 

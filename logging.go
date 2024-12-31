@@ -52,6 +52,7 @@ var (
 var (
 	Errorf, Warnf, Infof, Debugf Displayf
 	Error, Warn, Info, Debug     Display
+	Infop                        Display
 	Errorw                       Create
 )
 
@@ -107,6 +108,14 @@ func Init(verbose *bool, jsonLogs *bool) {
 		pcs = loc.CallersFill(1, pcsbuf[:])
 		record = slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
+	}
+
+	Infop = func(args ...string) {
+		if !Logger.Enabled(ctx, slog.LevelInfo) {
+			return
+		}
+
+		fmt.Println(strings.Join(args, " "))
 	}
 
 	Error = func(args ...string) {

@@ -73,12 +73,14 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 	}
 
 	tintHandler = &tint.Options{
-		Level: logLevel,
+		Level:   logLevel,
+		NoColor: !*colour,
 	}
 
 	errTintHandler = &tint.Options{
 		Level:     logLevel,
 		AddSource: true,
+		NoColor:   !*colour,
 	}
 
 	if *verbose {
@@ -95,13 +97,8 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 		Logger = slog.New(slog.NewJSONHandler(os.Stderr, handler))
 		errLogger = slog.New(slog.NewJSONHandler(os.Stderr, errHandler))
 	} else {
-		if *colour {
-			Logger = slog.New(tint.NewHandler(os.Stderr, tintHandler))
-			errLogger = slog.New(tint.NewHandler(os.Stderr, errTintHandler))
-		} else {
-			Logger = slog.New(slog.NewTextHandler(os.Stderr, handler))
-			errLogger = slog.New(slog.NewTextHandler(os.Stderr, errHandler))
-		}
+		Logger = slog.New(tint.NewHandler(os.Stderr, tintHandler))
+		errLogger = slog.New(tint.NewHandler(os.Stderr, errTintHandler))
 	}
 
 	slog.SetDefault(Logger)

@@ -16,7 +16,17 @@ func TestMain(m *testing.M) {
 
 func BenchmarkInfo(b *testing.B) {
 	b.ReportAllocs()
-	Init(bp(false), bp(false))
+	Init(bp(false), bp(false), bp(false))
+
+	for range 50 {
+		Info("Hello", "World")
+		Error("Hello", "World")
+		Warn("Hello", "World")
+	}
+}
+func BenchmarkInfoColour(b *testing.B) {
+	b.ReportAllocs()
+	Init(bp(false), bp(false), bp(true))
 
 	for range 50 {
 		Info("Hello", "World")
@@ -27,12 +37,12 @@ func BenchmarkInfo(b *testing.B) {
 
 func BenchmarkInfof(b *testing.B) {
 	b.ReportAllocs()
-	Init(bp(false), bp(false))
+	Init(bp(false), bp(false), bp(false))
 
 	for range 50 {
-		Info("Hello", "World")
-		Error("Hello", "World")
-		Warn("Hello", "World")
+		Infof("Hello", "World")
+		Errorf("Hello", "World")
+		Warnf("Hello", "World")
 	}
 }
 

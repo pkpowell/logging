@@ -60,7 +60,7 @@ var (
 var pcsbuf [3]loc.PC
 var pcs loc.PCs
 
-func Init(verbose *bool, jsonLogs *bool) {
+func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 	ctx = context.Background()
 
 	handler = &slog.HandlerOptions{
@@ -95,8 +95,13 @@ func Init(verbose *bool, jsonLogs *bool) {
 		Logger = slog.New(slog.NewJSONHandler(os.Stderr, handler))
 		errLogger = slog.New(slog.NewJSONHandler(os.Stderr, errHandler))
 	} else {
-		Logger = slog.New(tint.NewHandler(os.Stderr, tintHandler))
-		errLogger = slog.New(tint.NewHandler(os.Stderr, errTintHandler))
+		if *colour {
+			Logger = slog.New(tint.NewHandler(os.Stderr, tintHandler))
+			errLogger = slog.New(tint.NewHandler(os.Stderr, errTintHandler))
+		} else {
+			Logger = slog.New(slog.NewTextHandler(os.Stderr, handler))
+			errLogger = slog.New(slog.NewTextHandler(os.Stderr, errHandler))
+		}
 	}
 
 	slog.SetDefault(Logger)

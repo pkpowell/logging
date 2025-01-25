@@ -7,7 +7,7 @@ require (
 	github.com/pkpowell/humanize v0.5.3
 )
 
-require github.com/govalues/decimal v0.1.35 // indirect
+require github.com/govalues/decimal v0.1.36 // indirect
 
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect

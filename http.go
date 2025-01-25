@@ -22,7 +22,7 @@ var (
 	d        string
 )
 
-func HTTPLogs(h http.Handler, verbose *bool, webLogs *bool) http.Handler {
+func HTTPHandler(h http.Handler, verbose *bool, webLogs *bool) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		start = time.Now()
@@ -47,6 +47,34 @@ func HTTPLogs(h http.Handler, verbose *bool, webLogs *bool) http.Handler {
 		duration = time.Since(start)
 
 		d = r.Proto + " from " + r.RemoteAddr + " " + strconv.Itoa(ww.statusCode) + " " + r.Method + " " + r.RequestURI + " " + duration.String() + " " + units.Int(length).String()
+
+		if *webLogs && !*verbose {
+			Info(d)
+		} else {
+			Debug(d)
+		}
+	})
+}
+
+func HTTPHandlerFunc(h http.HandlerFunc, verbose *bool, webLogs *bool) http.HandlerFunc {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		var err error
+
+		h.ServeHTTP(rw, r) // serve the original request
+		duration = time.Since(start)
+
+		if r.Method == http.MethodPost {
+			cl = rw.Header().Get("Content-Length")
+			if cl != "" {
+				length, err = strconv.Atoi(cl)
+				if err != nil {
+					Error("strconv.Atoi error", err.Error())
+				}
+			}
+		}
+
+		// avoid fmt.Sprintf for performance
+		d = r.Proto + " from " + r.RemoteAddr + " " + r.Method + " " + r.RequestURI + " " + duration.String() + " " + units.Int(length).String()
 
 		if *webLogs && !*verbose {
 			Info(d)

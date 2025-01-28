@@ -3,7 +3,7 @@ module github.com/pkpowell/logging
 go 1.23.2
 
 require (
-	github.com/lmittmann/tint v1.0.6
+	github.com/lmittmann/tint v1.0.7
 	github.com/pkpowell/humanize v0.5.3
 )
 

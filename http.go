@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"log"
+
 	"github.com/pkpowell/humanize/units"
 )
 
@@ -57,14 +59,22 @@ func HTTPHandler(h http.Handler, verbose *bool, webLogs *bool) http.Handler {
 }
 
 func HTTPHandlerFunc(h http.HandlerFunc, verbose *bool, webLogs *bool) http.HandlerFunc {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+	log.Printf("HTTPHandlerFunc %v\n", h)
+	hf := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("HTTPHandlerFunc %v\n", h)
 		var err error
+		start = time.Now()
+		length = 0
 
-		h.ServeHTTP(rw, r) // serve the original request
+		ww = &wrappedWriter{
+			ResponseWriter: w,
+			statusCode:     http.StatusOK,
+		}
+		h.ServeHTTP(ww, r) // serve the original request
 		duration = time.Since(start)
 
 		if r.Method == http.MethodPost {
-			cl = rw.Header().Get("Content-Length")
+			cl = w.Header().Get("Content-Length")
 			if cl != "" {
 				length, err = strconv.Atoi(cl)
 				if err != nil {
@@ -82,4 +92,6 @@ func HTTPHandlerFunc(h http.HandlerFunc, verbose *bool, webLogs *bool) http.Hand
 			Debug(d)
 		}
 	})
+
+	return http.HandlerFunc(hf)
 }

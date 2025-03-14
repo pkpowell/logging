@@ -28,6 +28,8 @@ const (
 
 const (
 	Reset   = "\033[0m"
+	Bold    = "\033[1m"
+	Reverse = "\033[7m"
 	Red     = "\033[31m"
 	Green   = "\033[32m"
 	Yellow  = "\033[33m"
@@ -51,13 +53,14 @@ var (
 var (
 	Errorf, Warnf, Infof, Debugf Displayf
 	Error, Warn, Info, Debug     Display
+	Infop                        Display
 	Errorw                       Create
 )
 
 var pcsbuf [3]loc.PC
 var pcs loc.PCs
 
-func Init(verbose *bool, jsonLogs *bool) {
+func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 	ctx = context.Background()
 
 	handler = &slog.HandlerOptions{
@@ -70,12 +73,14 @@ func Init(verbose *bool, jsonLogs *bool) {
 	}
 
 	tintHandler = &tint.Options{
-		Level: logLevel,
+		Level:   logLevel,
+		NoColor: !*colour,
 	}
 
 	errTintHandler = &tint.Options{
 		Level:     logLevel,
 		AddSource: true,
+		NoColor:   !*colour,
 	}
 
 	if *verbose {
@@ -106,6 +111,14 @@ func Init(verbose *bool, jsonLogs *bool) {
 		pcs = loc.CallersFill(1, pcsbuf[:])
 		record = slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
+	}
+
+	Infop = func(args ...string) {
+		if !Logger.Enabled(ctx, slog.LevelInfo) {
+			return
+		}
+
+		fmt.Println(strings.Join(args, " "))
 	}
 
 	Error = func(args ...string) {

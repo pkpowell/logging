@@ -46,8 +46,8 @@ var (
 	tintHandler, errTintHandler *tint.Options
 	logLevel                    = &slog.LevelVar{} // INFO
 
-	ctx    context.Context
-	record slog.Record
+	ctx context.Context
+	// record slog.Record
 )
 
 var (
@@ -58,7 +58,8 @@ var (
 )
 
 var pcsbuf [3]loc.PC
-var pcs loc.PCs
+
+// var pcs loc.PCs
 
 func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 	ctx = context.Background()
@@ -108,8 +109,8 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 			return
 		}
 
-		pcs = loc.CallersFill(1, pcsbuf[:])
-		record = slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), uintptr(pcs[0]))
+		pcs := loc.CallersFill(1, pcsbuf[:])
+		record := slog.NewRecord(time.Now(), slog.LevelInfo, strings.Join(args, " "), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -126,8 +127,8 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 			return
 		}
 
-		pcs = loc.CallersFill(1, pcsbuf[:])
-		record = slog.NewRecord(time.Now(), slog.LevelError, strings.Join(args, " "), uintptr(pcs[0]))
+		pcs := loc.CallersFill(1, pcsbuf[:])
+		record := slog.NewRecord(time.Now(), slog.LevelError, strings.Join(args, " "), uintptr(pcs[0]))
 
 		_ = Logger.Handler().Handle(ctx, record)
 	}
@@ -137,8 +138,8 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 			return
 		}
 
-		pcs = loc.CallersFill(1, pcsbuf[:])
-		record = slog.NewRecord(time.Now(), slog.LevelWarn, strings.Join(args, " "), uintptr(pcs[0]))
+		pcs := loc.CallersFill(1, pcsbuf[:])
+		record := slog.NewRecord(time.Now(), slog.LevelWarn, strings.Join(args, " "), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -147,8 +148,8 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 			return
 		}
 
-		pcs = loc.CallersFill(1, pcsbuf[:])
-		record = slog.NewRecord(time.Now(), slog.LevelDebug, strings.Join(args, " "), uintptr(pcs[0]))
+		pcs := loc.CallersFill(1, pcsbuf[:])
+		record := slog.NewRecord(time.Now(), slog.LevelDebug, strings.Join(args, " "), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -157,8 +158,8 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 			return
 		}
 
-		pcs = loc.CallersFill(1, pcsbuf[:])
-		record = slog.NewRecord(time.Now(), slog.LevelInfo, fmt.Sprintf(format, args...), uintptr(pcs[0]))
+		pcs := loc.CallersFill(1, pcsbuf[:])
+		record := slog.NewRecord(time.Now(), slog.LevelInfo, fmt.Sprintf(format, args...), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -167,8 +168,8 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 			return
 		}
 
-		pcs = loc.CallersFill(1, pcsbuf[:])
-		record = slog.NewRecord(time.Now(), slog.LevelWarn, fmt.Sprintf(format, args...), uintptr(pcs[0]))
+		pcs := loc.CallersFill(1, pcsbuf[:])
+		record := slog.NewRecord(time.Now(), slog.LevelWarn, fmt.Sprintf(format, args...), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -177,8 +178,8 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 			return
 		}
 
-		pcs = loc.CallersFill(1, pcsbuf[:])
-		record = slog.NewRecord(time.Now(), slog.LevelDebug, fmt.Sprintf(format, args...), uintptr(pcs[0]))
+		pcs := loc.CallersFill(1, pcsbuf[:])
+		record := slog.NewRecord(time.Now(), slog.LevelDebug, fmt.Sprintf(format, args...), uintptr(pcs[0]))
 		_ = Logger.Handler().Handle(ctx, record)
 	}
 
@@ -187,8 +188,8 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 			return
 		}
 
-		pcs = loc.CallersFill(1, pcsbuf[:])
-		record = slog.NewRecord(time.Now(), slog.LevelError, fmt.Sprintf(format, args...), uintptr(pcs[0]))
+		pcs := loc.CallersFill(1, pcsbuf[:])
+		record := slog.NewRecord(time.Now(), slog.LevelError, fmt.Sprintf(format, args...), uintptr(pcs[0]))
 		_ = errLogger.Handler().Handle(ctx, record)
 	}
 
@@ -200,8 +201,8 @@ func Init(verbose *bool, jsonLogs *bool, colour *bool) {
 			return nil
 		}
 
-		pcs = loc.CallersFill(1, pcsbuf[:])
-		record = slog.NewRecord(time.Now(), slog.LevelError, fmt.Errorf(text+" %w", err).Error(), uintptr(pcs[0]))
+		pcs := loc.CallersFill(1, pcsbuf[:])
+		record := slog.NewRecord(time.Now(), slog.LevelError, fmt.Errorf(text+" %w", err).Error(), uintptr(pcs[0]))
 		return errors.New(record.Message)
 	}
 }

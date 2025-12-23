@@ -1,10 +1,10 @@
 module github.com/pkpowell/logging
 
-go 1.23.2
+go 1.24
 
 require (
 	github.com/lmittmann/tint v1.1.2
-	github.com/pkpowell/humanize v0.5.3
+	github.com/pkpowell/humanize v0.6.1
 	tlog.app/go/loc v0.7.2
 )
 
